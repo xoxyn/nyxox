@@ -1,0 +1,176 @@
+{{ define "main" }}
+<main class="notfound" data-egg="true">
+  <div class="nf-terminal">
+    <p class="term-line">
+      <span class="term-path">visitor@nyxox</span>&nbsp;<span class="term-prompt">~ $</span>&nbsp;<span id="nf-command">open <noscript>this page</noscript></span>
+    </p>
+    <p class="term-line">
+      zsh: command not found: <span id="nf-path" class="nf-bad-cmd">this page</span>
+    </p>
+
+    <div class="nf-hint">did you mean:</div>
+    <nav class="nf-suggestions" aria-label="Suggested pages">
+      {{ $home := "" | absURL }}
+      <a href="{{ $home }}" class="taxonomy-pill">home</a>
+      <a href="{{ "about/" | relLangURL }}" class="taxonomy-pill">about</a>
+      <a href="{{ "posts/" | relLangURL }}" class="taxonomy-pill">posts</a>
+      <a href="{{ "portfolio/" | relLangURL }}" class="taxonomy-pill">portfolio</a>
+      <a href="{{ "quotes/" | relLangURL }}" class="taxonomy-pill">quotes</a>
+      <a href="{{ "search/" | relLangURL }}" class="taxonomy-pill">search</a>
+    </nav>
+
+    <form id="nf-form" class="nf-form" autocomplete="off" spellcheck="false">
+      <label for="nf-input" class="term-path" aria-hidden="true">visitor@nyxox ~ $</label>
+      <input id="nf-input" type="text" placeholder="try: help — or 'ls' to list posts" aria-label="Try the shell">
+    </form>
+    <div id="nf-out" class="nf-out" aria-live="polite"></div>
+  </div>
+</main>
+{{ end }}
+
+{{ define "scripts" }}
+<script>
+(function () {
+  'use strict';
+
+  var pathEl = document.getElementById('nf-path');
+  var cmdEl = document.getElementById('nf-command');
+  if (pathEl) {
+    var requested = window.decodeURIComponent(window.location.pathname.replace(/\/$/, '')) || '/';
+    pathEl.textContent = requested;
+    if (cmdEl) cmdEl.textContent = 'open ' + requested;
+  }
+
+  var out = document.getElementById('nf-out');
+  var form = document.getElementById('nf-form');
+  var input = document.getElementById('nf-input');
+  if (!out || !form || !input) return;
+
+  var base = (document.body.dataset.baseurl || '/').replace(/\/?$/, '/');
+  var sitePath = (new URL(base, window.location.href).pathname) || '/';
+  var posts = null;
+
+  function line(text, cls) {
+    var div = document.createElement('div');
+    div.className = 't-line nf-out-line' + (cls ? ' ' + cls : '');
+    div.textContent = text;
+    out.appendChild(div);
+  }
+
+  function link(text, href) {
+    var div = document.createElement('div');
+    div.className = 't-line nf-out-line';
+    var a = document.createElement('a');
+    a.textContent = text;
+    a.href = href;
+    div.appendChild(a);
+    out.appendChild(div);
+  }
+
+  function getIndex() {
+    if (posts) return Promise.resolve(posts);
+    return fetch(sitePath + 'index.json')
+      .then(function (r) {
+        if (!r.ok) throw new Error('no index');
+        return r.json();
+      })
+      .then(function (data) { posts = data; return data; });
+  }
+
+  // decode entities (&rsquo; ...) from .Plain/.Title for display
+  function decodeEntities(text) {
+    if (!text || text.indexOf('&') === -1) return text;
+    var ta = document.createElement('textarea');
+    ta.innerHTML = text;
+    return ta.value;
+  }
+
+  var commands = {
+    help: function () {
+      line('available: home · ls · open <post> · search <query> · date · clear');
+    },
+
+    clear: function () { out.textContent = ''; },
+
+    date: function () {
+      line('now: ' + new Date().toLocaleString('en-GB', { dateStyle: 'full', timeStyle: 'medium' }));
+    },
+
+    ls: function () {
+      getIndex().then(function (data) {
+        line(data.length + ' indexed pages:');
+        data.slice().reverse().forEach(function (p) {
+          var parts = (p.url || '/').split('/').filter(Boolean);
+          var name = parts.length ? parts[parts.length - 1] : p.url;
+          link('  ' + name, p.url);
+        });
+      }).catch(function () {
+        line('ls: index unreachable — use the pills above instead.', true);
+      });
+    },
+
+    open: function (args) {
+      var name = (args[0] || '').toLowerCase().replace(/\/$/, '');
+      if (!name || name === 'home') { window.location.href = sitePath; return; }
+      getIndex().then(function (data) {
+        var exact = data.filter(function (p) {
+          var parts = (p.url || '/').split('/').filter(Boolean);
+          return parts.length && parts[parts.length - 1].toLowerCase() === name;
+        });
+        if (exact.length === 1) { window.location.href = exact[0].url; return; }
+        var fuzzy = data.filter(function (p) {
+          return (p.url || '').toLowerCase().indexOf(name) !== -1;
+        }).slice(0, 8);
+        if (exact.length > 1 || fuzzy.length) {
+          line('open: ambiguous — candidates:');
+          (exact.length > 1 ? exact : fuzzy).forEach(function (p) {
+            link('  ' + decodeEntities(p.title || p.url) + ' → ' + p.url, p.url);
+          });
+        } else {
+          line('open: no such post: ' + name, true);
+        }
+      }).catch(function () {
+        line('open: index unreachable.', true);
+      });
+    },
+
+    search: function (args) {
+      var q = args.join(' ').toLowerCase();
+      if (!q) { line('search: missing query', true); return; }
+      getIndex().then(function (data) {
+        var hits = data.filter(function (p) {
+          return ((p.title || '') + ' ' + (p.contents || '')).toLowerCase().indexOf(q) !== -1;
+        }).slice(0, 6);
+        if (!hits.length) { line('search: 0 results — even grep gave up.', true); return; }
+        line(hits.length + ' hit(s):');
+        hits.forEach(function (p) { link('  ' + decodeEntities(p.title || p.url), p.url); });
+      }).catch(function () {
+        line('search: index unreachable.', true);
+      });
+    }
+  };
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var raw = input.value.trim();
+    input.value = '';
+    if (!raw) return;
+    line('visitor@nyxox ~ $ ' + raw, 'nf-echo');
+    var argv = raw.split(/\s+/);
+    var fn = commands[argv[0].toLowerCase()];
+    if (fn) {
+      fn(argv.slice(1));
+    } else {
+      line('zsh: command not found: ' + argv[0] + " — try 'help'", true);
+    }
+    out.scrollIntoView({ block: 'nearest' });
+  });
+
+  // focus the mini prompt a little late so the auto-opening shell can win first
+  var hasShell = document.getElementById('terminal-panel');
+  if (!hasShell) {
+    window.setTimeout(function () { try { input.focus(); } catch (err) { /* ignore */ } }, 800);
+  }
+})();
+</script>
+{{ end }}

@@ -24,6 +24,23 @@ images = ["images/og-default.png"]
 [params.icons]
 throw_on_error = false
 
+[params.typewriter]
+enabled = true
+typeMs = 34
+deleteMs = 16
+holdMs = 2400
+lateNightStart = 0
+lateNightEnd = 5
+phrases = [
+  "neural nets and chill",
+  "sed -i 's/bug/feature/'",
+  "while (alive) { ship(); }",
+  "grep'ing my own memory",
+  "cargo build && pray",
+  "var pile_zero = 0;",
+]
+lateNightPhrase = "you should be asleep."
+
 [params.contact]
 email= "numterminal@gmail.com"
 

@@ -1,0 +1,23 @@
+<footer>
+  <p>&copy; {{ now.Year }}
+    <!-- <a href="{{ .Site.BaseURL }}"><b>{{ if .Site.Copyright }}{{ .Site.Copyright }}{{ else }}{{ .Site.Title }}{{ end }}</b></a>. -->
+    Nyxox.
+    {{- range .Site.Menus.footer }}
+    <a href="{{ .URL }}"><b>{{ .Name }}</b></a>.
+    {{- end }}
+  </p>
+
+  {{/* Site pulse: build time + days since the first post (computed at build). */}}
+  {{ $earliest := now }}
+  {{ range where .Site.RegularPages "Type" "in" .Site.Params.mainSections }}
+    {{ if and (not .Date.IsZero) (.Date.Before $earliest) }}
+      {{ $earliest = .Date }}
+    {{ end }}
+  {{ end }}
+  {{ $uptimeDays := div (sub now.Unix $earliest.Unix) 86400 }}
+  <p class="footer-status">
+    <span class="footer-line">nyxox@dev:~$ status</span>
+    <span class="footer-out">last build {{ (now.UTC).Format "2 Jan 2006 15:04 UTC" }} · uptime {{ $uptimeDays }}d · {{ printf "%d" (len (where .Site.RegularPages "Type" "in" .Site.Params.mainSections)) }} posts</span>
+    <a id="footer-egg" class="footer-egg" href="#" role="button" title="~" aria-label="Open hidden terminal">~</a>
+  </p>
+</footer>

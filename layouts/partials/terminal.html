@@ -1,0 +1,16 @@
+<div id="terminal-panel" hidden>
+  <div id="terminal-window" role="dialog" aria-modal="false" aria-label="Hidden terminal">
+    <div id="terminal-header">
+      <span class="terminal-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="terminal-title">nyxox@dev: ~</span>
+      <button type="button" id="terminal-close" class="terminal-close" aria-label="Close terminal">&times;</button>
+    </div>
+    <div id="terminal-scroll">
+      <div id="terminal-output" aria-live="polite"></div>
+    </div>
+    <form id="terminal-prompt" autocomplete="off" spellcheck="false">
+      <label for="terminal-input" class="terminal-prompt-label" aria-hidden="true"><span class="prompt-user">visitor</span><span class="prompt-at">@</span><span class="prompt-host">nyxox</span><span class="prompt-sym">:</span><span class="prompt-path" id="terminal-cwd">~</span><span class="prompt-sym">&nbsp;$&nbsp;</span></label>
+      <input id="terminal-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Terminal command input">
+    </form>
+  </div>
+</div>
