@@ -13,6 +13,20 @@
   var reduceMotion = !!(window.matchMedia &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
+  var coarsePointer = !!(window.matchMedia &&
+    window.matchMedia('(pointer: coarse)').matches);
+
+  var NyxoxTip = {
+    // touch devices have no ~ key — reword tease phrases accordingly
+    adaptPhrases: function (phrases, isCoarse) {
+      if (!isCoarse) return phrases;
+      return (phrases || []).map(function (p) {
+        return p.replace(/press\s*~/i, 'tap the ~ below');
+      });
+    },
+    show: null // filled in by the tip-toast section below
+  };
+
   /* -----------------------------------------
      Typewriter subtitle
      Server-rendered text is the no-JS fallback;
@@ -40,6 +54,9 @@
     if (cfg.lateNight && hour >= lateStart && hour < lateEnd) {
       phrases = [cfg.lateNight].concat(phrases);
     }
+
+    // touch devices have no ~ key — reword tease phrases accordingly
+    phrases = NyxoxTip.adaptPhrases(phrases, coarsePointer);
 
     if (reduceMotion) {
       el.textContent = phrases[0]; // no typing, keep static text
@@ -265,6 +282,84 @@
 
   // terminal.js reaches in for `theme crt`
   window.NyxoxFX = { setCRT: setCRT };
+
+  /* -----------------------------------------
+     First-visit tip toast — a single nudge
+     toward the hidden terminal, at most once
+     every 30 days, suppressed if the visitor
+     has already opened the shell. Tap/whole-
+     toast click opens it on every device.
+     ----------------------------------------- */
+  (function tipToast() {
+    var SHOW_AFTER_MS = 20000;
+    var AGAIN_AFTER_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
+    var AUTO_HIDE_MS = 7000;
+
+    function hasOpenedShell() {
+      try { return localStorage.getItem('nyxox-opened') === '1'; }
+      catch (err) { return true; } // storage blocked → stay quiet
+    }
+
+    function eligible() {
+      var last = 0;
+      try {
+        last = parseInt(localStorage.getItem('nyxox-tip-last') || '0', 10) || 0;
+      } catch (err) { return false; }
+      if (Date.now() - last < AGAIN_AFTER_MS) return false;
+      return !hasOpenedShell();
+    }
+
+    function dismiss() {
+      var tip = document.getElementById('nyx-tip');
+      if (!tip) return;
+      tip.classList.remove('nyx-tip-visible');
+      window.setTimeout(function () {
+        if (tip.parentNode) tip.parentNode.removeChild(tip);
+      }, 500);
+    }
+
+    function build() {
+      var tip = document.createElement('div');
+      tip.id = 'nyx-tip';
+      tip.className = 'nyx-tip';
+      tip.setAttribute('role', 'status');
+      tip.setAttribute('aria-label', 'Easter egg hint');
+      tip.textContent = coarsePointer ? 'tip: tap here for a shell' : 'tip: press ~';
+      tip.addEventListener('click', function () {
+        dismiss();
+        if (window.NyxoxTerminal && window.NyxoxTerminal.open) window.NyxoxTerminal.open();
+      });
+      document.body.appendChild(tip);
+      // double rAF so the transition actually runs
+      window.requestAnimationFrame(function () {
+        window.requestAnimationFrame(function () {
+          tip.classList.add('nyx-tip-visible');
+        });
+      });
+      window.setTimeout(dismiss, AUTO_HIDE_MS);
+      return tip;
+    }
+
+    function show() {
+      if (document.getElementById('nyx-tip')) return; // already showing
+      if (document.querySelector('#terminal-panel:not([hidden])')) return; // shell already open
+      if (!eligible()) return;
+      if (!window.NyxoxTerminal) return; // terminal.js missing → point is moot
+      try {
+        localStorage.setItem('nyxox-tip-last', String(Date.now()));
+      } catch (err) { /* private mode → don't loop the nag, just skip */ return; }
+      build();
+    }
+
+    NyxoxTip.show = show;
+    // 404 pages auto-open the shell themselves — no tip needed there
+    if (!document.querySelector('main[data-egg]')) {
+      window.setTimeout(show, SHOW_AFTER_MS);
+    }
+
+    // expose nil-safe internals for curious visitors + tests
+    window.NyxoxTip = NyxoxTip;
+  })();
 
   /* -----------------------------------------
      For the devtools crowd — yes, you.

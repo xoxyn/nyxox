@@ -1499,18 +1499,76 @@ header nav .nav-links a:focus-visible::after {
   all: unset;
   cursor: pointer;
   font: inherit;
-  padding: 1px 5px;
-  border-radius: 3px;
+  padding: 1px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
   color: var(--color-text-dim);
+  animation: footer-egg-blink 1.8s steps(2, end) infinite;
 }
 
 .footer-egg:hover,
 .footer-egg:focus-visible {
   color: var(--color-text-bright);
+  border-color: var(--color-text-dim);
+  animation: none;
 }
 
 .footer-egg:focus-visible {
   outline: 1px solid var(--color-text-dim);
+}
+
+/* touch: no ~ key exists, so this button carries discoverability —
+   give it a real tap target while staying quiet-looking */
+@media (pointer: coarse) {
+  .footer-egg {
+    padding: 7px 16px;
+    margin: 2px 0;
+  }
+}
+
+@keyframes footer-egg-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* =====================
+   FIRST-VISIT TIP TOAST
+   ===================== */
+.nyx-tip {
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 900;
+  padding: 8px 14px;
+  font:
+    12px/1.4 "JetBrains Mono",
+    monospace;
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
+}
+
+.nyx-tip.nyx-tip-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.nyx-tip:hover,
+.nyx-tip:focus-visible {
+  color: var(--color-text-bright);
+  border-color: var(--color-text-dim);
 }
 
 /* =====================
@@ -1921,6 +1979,14 @@ html.crt body {
   .reveal {
     opacity: 1;
     transform: none;
+    transition: none;
+  }
+
+  .footer-egg {
+    animation: none;
+  }
+
+  .nyx-tip {
     transition: none;
   }
 
