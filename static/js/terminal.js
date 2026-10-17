@@ -466,6 +466,10 @@
     isOpen = true;
     openedBy = restoredBy || document.activeElement;
     panel.hidden = false;
+    // once found, there's no reason to ever hint about it again
+    try { localStorage.setItem('nyxox-opened', '1'); } catch (err) { /* private mode */ }
+    var tip = document.getElementById('nyx-tip');
+    if (tip) tip.parentNode.removeChild(tip);
     window.requestAnimationFrame(function () {
       panel.classList.add('terminal-visible');
     });
