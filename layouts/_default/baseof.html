@@ -109,6 +109,10 @@
   <link rel="stylesheet" href="{{ . | relURL }}">
   {{ end }}
 
+  <!-- Site scripts -->
+  <script src="{{ "js/nyxox.js" | relURL }}" defer></script>
+  <script src="{{ "js/terminal.js" | relURL }}" defer></script>
+
   <!-- Structured data -->
   {{ partial "schema.html" . }}
 </head>
@@ -121,6 +125,8 @@
   {{ end }}
 
   {{ partial "footer" . }}
+
+  {{ partial "terminal.html" . }}
 
   {{ block "scripts" . }}
   {{ end }}

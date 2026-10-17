@@ -4,9 +4,19 @@
     <div class="site-title">
       <a href="{{ .Site.BaseURL }}">Victor<span class="header-handle"> (nyxox)</span></a>
     </div>
-    {{ with .Site.Params.subtitle }}
-    <div class="site-subtitle">{{ . }}</div>
-    {{ end }}
+    {{ $tw := "" }}
+  {{ with .Site.Params.typewriter }}
+  {{ if .enabled }}
+  {{ $twConfig := dict "phrases" .phrases "lateNight" .lateNightPhrase "typeMs" .typeMs "deleteMs" .deleteMs "holdMs" .holdMs "lateNightStart" .lateNightStart "lateNightEnd" .lateNightEnd }}
+  {{ $tw = $twConfig | jsonify }}
+  {{ end }}
+  {{ end }}
+  {{ with .Site.Params.subtitle }}
+  <div class="site-subtitle">
+    <span class="sr-only">{{ . }}</span>
+    <span aria-hidden="true"><span id="typewriter" {{ with $tw }}data-config="{{ . }}"{{ end }}>{{ $.Site.Params.subtitle }}</span><span class="term-cursor" aria-hidden="true"></span></span>
+  </div>
+  {{ end }}
   </div>
   {{ with $img }}
   <a href="{{ $.Site.BaseURL }}" class="site-image">
