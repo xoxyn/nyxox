@@ -1,19 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="4" fill="#000"/>
-  <!-- Gallows -->
-  <line x1="6" y1="28" x2="6" y2="6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-  <line x1="6" y1="6" x2="24" y2="6" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-  <line x1="18" y1="6" x2="18" y2="10" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
-  <!-- Rope -->
-  <line x1="18" y1="10" x2="18" y2="14" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-  <!-- Head -->
-  <circle cx="18" cy="17" r="3" stroke="#fff" stroke-width="1.5" fill="none"/>
-  <!-- Body -->
-  <line x1="18" y1="20" x2="18" y2="26" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-  <!-- Arms -->
-  <line x1="18" y1="22" x2="14" y2="24" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="18" y1="22" x2="22" y2="24" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-  <!-- Legs -->
-  <line x1="18" y1="26" x2="15" y2="28" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="18" y1="26" x2="21" y2="28" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 291 291">
+  <rect width="291" height="291" fill="#1e1e1e"/>
+  <path d="M0 291 L0 250 Q10 215 70 195 L110 180 L175 180 L225 195 Q285 215 291 250 L291 291 Z" fill="#0d0d0d"/>
+  <path d="M105 160 L190 150 L195 185 Q150 215 120 190 Z" fill="#555"/>
+  <path d="M88 70 Q90 10 140 8 Q195 10 195 70 Z" fill="#111"/>
+  <ellipse cx="140" cy="108" rx="52" ry="68" transform="rotate(-6 140 108)" fill="#666"/>
 </svg>

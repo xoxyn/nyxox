@@ -35,9 +35,7 @@ body {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px 16px;
-  font:
-    14px/1.6 "JetBrains Mono",
-    monospace;
+  font-family: "Iosevka Charon Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   color: var(--color-text);
   background: var(--color-bg);
 }
